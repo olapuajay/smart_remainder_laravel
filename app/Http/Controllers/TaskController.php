@@ -36,7 +36,7 @@ class TaskController extends Controller
         session()->put('tasks', $tasks);
 
         // ✅ Send email
-        Mail::to('ajju6533@gmail.com')->send(new TaskReminderMail($newTask));
+        Mail::to('olapuajay@gmail.com')->send(new TaskReminderMail($newTask));
 
         return redirect()->route('dashboard')->with('message', 'Task added successfully and email sent!');
     }
