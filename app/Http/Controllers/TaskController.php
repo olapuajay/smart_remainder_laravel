@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TaskReminderMail;
 
 class TaskController extends Controller
 {
@@ -15,24 +17,28 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required | string | max:255',
-            'reminder_time' => 'required | date',
+            'title' => 'required|string|max:255',
+            'reminder_time' => 'required|date',
         ]);
 
         $tasks = session()->get('tasks', []);
 
-        // Generate a new ID (you can use uniqid() if needed)
         $newId = count($tasks) > 0 ? end($tasks)['id'] + 1 : 1;
 
-        $tasks[] = [
+        $newTask = [
             'id' => $newId,
             'title' => $request->title,
             'reminder_time' => $request->reminder_time,
         ];
 
-        session()->put('tasks', $tasks); // Save updated list to session
+        $tasks[] = $newTask;
 
-        return redirect()->route('dashboard')->with('message', 'Task added successfully!');
+        session()->put('tasks', $tasks);
+
+        // ✅ Send email
+        Mail::to('ajju6533@gmail.com')->send(new TaskReminderMail($newTask));
+
+        return redirect()->route('dashboard')->with('message', 'Task added successfully and email sent!');
     }
 
     public function destroy($id)
